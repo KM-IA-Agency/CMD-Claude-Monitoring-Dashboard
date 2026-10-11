@@ -1,0 +1,15 @@
+# Code Context Engine : chemins exclus de l'index (CCE ne lit pas .gitignore).
+# Chaque entree pointee est aussi listee sans son point (particularite CCE 0.4.26).
+.pytest-tmp*/
+pytest-tmp*/
+.pytest_cache/
+pytest_cache/
+.ruff_cache/
+ruff_cache/
+.venv/
+venv/
+__pycache__/
+dist/
+build/
+runs/
+*.egg-info/

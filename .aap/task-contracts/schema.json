@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aap.local/schemas/dev-task-contract-v0.1.json",
+  "title": "AAP Dev Task Contract v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "issue",
+    "authorized_pr",
+    "goal",
+    "depends_on",
+    "scope",
+    "acceptance",
+    "risk",
+    "merge_policy",
+    "stop_when"
+  ],
+  "properties": {
+    "version": {
+      "const": "aap-dev-task-v0.1"
+    },
+    "issue": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "\\S"
+    },
+    "depends_on": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "uniqueItems": true
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed_paths",
+        "forbidden_paths"
+      ],
+      "properties": {
+        "allowed_paths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "forbidden_paths": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_tests",
+        "required_changed_files",
+        "commands",
+        "evidence",
+        "adversarial_cases"
+      ],
+      "properties": {
+        "required_tests": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required_changed_files": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "commands": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "adversarial_cases": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "expected_reason"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^\\S(.*\\S)?$"
+              },
+              "expected_reason": {
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9_]+$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "risk": {
+      "enum": [
+        "R0",
+        "R1",
+        "R2",
+        "R3"
+      ]
+    },
+    "merge_policy": {
+      "enum": [
+        "auto_on_green",
+        "human_approval",
+        "two_person",
+        "rapid_agent_review"
+      ]
+    },
+    "approval_policy_version": {
+      "type": "string",
+      "enum": [
+        "rapid-agent-review-v0.1"
+      ],
+      "description": "Required only when merge_policy is rapid_agent_review; absent for every other merge_policy."
+    },
+    "stop_when": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "authorized_pr": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["merge_policy"],
+        "properties": {
+          "merge_policy": { "const": "rapid_agent_review" }
+        }
+      },
+      "then": {
+        "required": ["approval_policy_version"],
+        "properties": {
+          "approval_policy_version": { "const": "rapid-agent-review-v0.1" }
+        }
+      },
+      "else": {
+        "not": { "required": ["approval_policy_version"] }
+      }
+    },
+    {
+      "if": {
+        "required": ["merge_policy"],
+        "properties": {
+          "merge_policy": { "const": "rapid_agent_review" }
+        }
+      },
+      "then": {
+        "required": ["risk"],
+        "properties": {
+          "risk": { "enum": ["R2", "R3"] }
+        }
+      }
+    }
+  ]
+}
